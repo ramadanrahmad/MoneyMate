@@ -31,8 +31,12 @@
                     <li><a href="#layanan">Service</a></li>
                     <li><a href="#about">About Us</a></li>
                     <li><a href="#faq">FAQ</a></li>
-                    <li><a href="#" class="btn-primary">Masuk</a></li>
-                    <li><a href="#" class="btn-secondary">Daftar</a></li>
+                    @auth
+                        <li><a href="{{ route('dashboard') }}" class="btn-primary">Dashboard</a></li>
+                    @else
+                        <li><a href="{{ route('login') }}" class="btn-primary">Masuk</a></li>
+                        <li><a href="{{ route('register') }}" class="btn-secondary">Daftar</a></li>
+                    @endauth
                 </ul>
             </nav>
             <div class="menu-toggle">
@@ -175,7 +179,7 @@
             <div class="cta-content">
                 <h2 class="cta-title">Take Control of Your <span>Finances</span> Now</h2>
                 <p class="cta-subtitle">Join <strong>users</strong> who transformed their finance management</p>
-                <a href="{{ route('transaksi.index') }}" class="cta-button">
+                <a href="{{ route('dashboard') }}" class="cta-button">
                     Start Your Financial Journey
                     </svg>
                 </a>

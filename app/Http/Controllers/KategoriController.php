@@ -29,8 +29,10 @@ class KategoriController extends Controller
     public function store(Request $request)
     {
         $request->validate(['nama' => 'required|string|max:255']);
-    Kategori::create($request->all());
-    return back();
+        $data = $request->all();
+        $data['user_id'] = auth()->id();
+        Kategori::create($data);
+        return back();
     }
 
     /**

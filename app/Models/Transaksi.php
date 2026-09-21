@@ -14,10 +14,10 @@ class Transaksi extends Model
 }
 
     protected $fillable = [
-        'jenis',        // 'pemasukan' atau 'pengeluaran'
-        'jumlah',
-        'keterangan',
+        'user_id',
         'kategori_id',
+        'tipe',
+        'jumlah',
         'catatan',
     ];
 }

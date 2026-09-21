@@ -13,8 +13,14 @@ class TransaksiController extends Controller
      */
     public function index()
     {
-        $transaksis = Transaksi::with('kategori')->latest()->get();
-    return view('transaksi.index', compact('transaksis'));
+        $userId = auth()->id();
+        $transaksis = Transaksi::with('kategori')->where('user_id', $userId)->latest()->get();
+        
+        $totalPemasukan = $transaksis->where('tipe', 'pemasukan')->sum('jumlah');
+        $totalPengeluaran = $transaksis->where('tipe', 'pengeluaran')->sum('jumlah');
+        $saldo = $totalPemasukan - $totalPengeluaran;
+
+        return view('transaksi.index', compact('transaksis', 'totalPemasukan', 'totalPengeluaran', 'saldo'));
     }
 
     /**
@@ -22,8 +28,9 @@ class TransaksiController extends Controller
      */
     public function create()
     {
-        $kategoris = Kategori::all();
-    return view('transaksi.create', compact('kategoris'));
+        $userId = auth()->id();
+        $kategoris = Kategori::where('user_id', $userId)->get();
+        return view('transaksi.create', compact('kategoris'));
     }
 
     /**
@@ -32,13 +39,16 @@ class TransaksiController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-        'kategori_id' => 'required|exists:kategoris,id',
-        'tipe' => 'required|in:pemasukan,pengeluaran',
-        'jumlah' => 'required|integer',
-    ]);
+            'kategori_id' => 'required|exists:kategoris,id',
+            'tipe' => 'required|in:pemasukan,pengeluaran',
+            'jumlah' => 'required|integer',
+        ]);
 
-    Transaksi::create($request->all());
-    return redirect()->route('transaksi.index');
+        $data = $request->all();
+        $data['user_id'] = auth()->id();
+        Transaksi::create($data);
+        
+        return redirect()->route('dashboard');
     }
 
     /**
