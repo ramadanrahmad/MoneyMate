@@ -1200,3 +1200,25 @@ nav ul li a:not(.btn-primary):not(.btn-secondary):hover:after {
         justify-content: center;
     }
 }
+/* Dark Mode Overrides */
+html.dark body { background-color: #111827; color: #f3f4f6; }
+html.dark header { background-color: #1f2937; }
+html.dark .hero, html.dark .services, html.dark .about-section, html.dark .faq { background: #111827; }
+html.dark .service-card, html.dark .faq-item { background-color: #1f2937; color: #f3f4f6; }
+html.dark .service-card h3, html.dark .faq-question h3, html.dark .section-header h2, html.dark .about-title, html.dark .hero-content h1 { color: #f9fafb; }
+html.dark .hero-content p, html.dark .service-card p, html.dark .about-text, html.dark .faq-answer p { color: #d1d5db; }
+html.dark nav ul li a { color: #f3f4f6; }
+html.dark .logo-icon { background-color: #374151; }
+html.dark .wave-shape svg { fill: #111827; }
+html.dark .feature-highlight p { background-color: rgba(31, 41, 55, 0.9); border-color: #374151; }
+html.dark .footer { background-color: #030712; border-top: 1px solid #1f2937; }
+html.dark .faq-question { border-bottom-color: #374151; }
+html.dark #preloader { background-color: #111827; }
+html.dark .btn-secondary { color: #f9fafb; }
+
+
+html.dark .faq-question { background-color: #1f2937; }
+
+
+html.dark .section-header p { color: #d1d5db; }
+

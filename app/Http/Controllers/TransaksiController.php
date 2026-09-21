@@ -8,24 +8,43 @@ use App\Models\Kategori;
 
 class TransaksiController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
+    public function index(Request $request)
     {
         $userId = auth()->id();
-        $transaksis = Transaksi::with('kategori')->where('user_id', $userId)->latest()->get();
+        
+        $month = $request->input('month', date('m'));
+        $year = $request->input('year', date('Y'));
+
+        // Transaksi filter
+        $query = Transaksi::with('kategori')
+            ->where('user_id', $userId)
+            ->whereMonth('created_at', $month)
+            ->whereYear('created_at', $year);
+
+        $transaksis = (clone $query)->latest()->get();
         
         $totalPemasukan = $transaksis->where('tipe', 'pemasukan')->sum('jumlah');
         $totalPengeluaran = $transaksis->where('tipe', 'pengeluaran')->sum('jumlah');
         $saldo = $totalPemasukan - $totalPengeluaran;
 
-        return view('transaksi.index', compact('transaksis', 'totalPemasukan', 'totalPengeluaran', 'saldo'));
+        // Data for Chart (Expenses grouped by category)
+        $chartData = [
+            'labels' => [],
+            'data' => []
+        ];
+        $expensesByCategory = (clone $query)->where('tipe', 'pengeluaran')
+            ->selectRaw('kategori_id, SUM(jumlah) as total')
+            ->groupBy('kategori_id')
+            ->get();
+            
+        foreach ($expensesByCategory as $expense) {
+            $chartData['labels'][] = $expense->kategori->nama;
+            $chartData['data'][] = $expense->total;
+        }
+
+        return view('transaksi.index', compact('transaksis', 'totalPemasukan', 'totalPengeluaran', 'saldo', 'month', 'year', 'chartData'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
     {
         $userId = auth()->id();
@@ -33,9 +52,6 @@ class TransaksiController extends Controller
         return view('transaksi.create', compact('kategoris'));
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
         $request->validate([
@@ -51,35 +67,45 @@ class TransaksiController extends Controller
         return redirect()->route('dashboard');
     }
 
-    /**
-     * Display the specified resource.
-     */
     public function show(Transaksi $transaksi)
     {
         //
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
     public function edit(Transaksi $transaksi)
     {
-        //
+        if ($transaksi->user_id !== auth()->id()) {
+            abort(403);
+        }
+        $kategoris = Kategori::where('user_id', auth()->id())->get();
+        return view('transaksi.edit', compact('transaksi', 'kategoris'));
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(Request $request, Transaksi $transaksi)
     {
-        //
+        if ($transaksi->user_id !== auth()->id()) {
+            abort(403);
+        }
+
+        $request->validate([
+            'kategori_id' => 'required|exists:kategoris,id',
+            'tipe' => 'required|in:pemasukan,pengeluaran',
+            'jumlah' => 'required|integer',
+        ]);
+
+        $transaksi->update($request->all());
+        
+        return redirect()->route('dashboard')->with('success', 'Transaksi berhasil diubah!');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(Transaksi $transaksi)
     {
-        //
+        if ($transaksi->user_id !== auth()->id()) {
+            abort(403);
+        }
+
+        $transaksi->delete();
+        
+        return redirect()->route('dashboard')->with('success', 'Transaksi berhasil dihapus!');
     }
 }
